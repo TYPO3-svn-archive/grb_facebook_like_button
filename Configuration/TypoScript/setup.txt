@@ -1,0 +1,56 @@
+plugin.tx_grbfacebooklikebutton {
+	settings{
+		colPos = 2
+		og{
+			type 			= website
+			image			= 
+			description 	= Default description, defindet with TypoScript
+			adminFacebookId = 
+			siteName		= Website name
+		}
+		buttonValue{
+			layout			= standard
+			showFaces		= true
+			width			= 450
+			action			= like
+			font			= arial
+			colorscheme		= default
+		}
+	}
+	view {
+		templateRootPath = {$plugin.tx_grbfacebooklikebutton.view.templateRootPath}
+		partialRootPath = {$plugin.tx_grbfacebooklikebutton.view.partialRootPath}
+		layoutRootPath = {$plugin.tx_grbfacebooklikebutton.view.layoutRootPath}
+	}
+}
+
+# -----------------------------------------------------------------------------------------
+# Extbase configuration
+# -----------------------------------------------------------------------------------------
+
+config.tx_extbase {
+    persistence{
+        enableAutomaticCacheClearing = 1
+        updateReferenceIndex = 0
+        classes {
+			Tx_GrbFacebookLikeButton_Domain_Model_Content {
+        		mapping {
+            		tableName = tt_content
+					columns {
+							# db-field tt_content   = db-field domain-model
+							# --------------------------------------------
+                        	CType.mapOnProperty 		= type   
+                        	image.mapOnProperty 		= images
+                        	bodytext.mapOnProperty 		= bodytext
+                        	colPos.mapOnProperty 		= colPos
+                    }
+        		}
+    		}    		
+        }
+    }
+}
+
+# -----------------------------------------------------------------------------------------
+# CSS
+# -----------------------------------------------------------------------------------------
+page.includeCSS.grb_facebook_like_button = EXT:grb_facebook_like_button/Resources/Public/CSS/grb_facebook_like_button.css

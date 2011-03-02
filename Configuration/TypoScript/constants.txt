@@ -1,0 +1,14 @@
+plugin.tx_grbfacebooklikebutton {
+	view {
+		# cat=plugin.tx_grbfacebooklikebutton/file; type=string; label=Path to template root (FE)
+		templateRootPath = EXT:grb_facebook_like_button/Resources/Private/Templates/
+		# cat=plugin.tx_grbfacebooklikebutton/file; type=string; label=Path to template partials (FE)
+		partialRootPath = EXT:grb_facebook_like_button/Resources/Private/Partials/
+		# cat=plugin.tx_grbfacebooklikebutton/file; type=string; label=Path to template layouts (FE)
+		layoutRootPath = EXT:grb_facebook_like_button/Resources/Private/Layouts/
+	}
+	persistence {
+		# cat=plugin.tx_grbfacebooklikebutton//a; type=int+; label=Default storage PID
+		storagePid = 
+	}
+}
