@@ -15,8 +15,11 @@ plugin.tx_grbfacebooklikebutton {
 			action			= like
 			font			= arial
 			colorscheme		= default
+			language		= de_DE
 		}
 	}
+	# PID where the News are stored
+	persistence.storagePid = 18
 	view {
 		templateRootPath = {$plugin.tx_grbfacebooklikebutton.view.templateRootPath}
 		partialRootPath = {$plugin.tx_grbfacebooklikebutton.view.partialRootPath}
@@ -45,7 +48,20 @@ config.tx_extbase {
                         	colPos.mapOnProperty 		= colPos
                     }
         		}
-    		}    		
+    		} 
+    		Tx_GrbFacebookLikeButton_Domain_Model_News {
+        		mapping {
+            		tableName = tt_news
+					columns {
+							# db-field tt_news   = db-field domain-model
+							# --------------------------------------------
+							uid.mapOnProperty			= uid
+                        	short.mapOnProperty 		= short   
+                        	image.mapOnProperty 		= images
+                        	bodytext.mapOnProperty 		= bodytext
+                    }
+        		}
+    		} 
         }
     }
 }

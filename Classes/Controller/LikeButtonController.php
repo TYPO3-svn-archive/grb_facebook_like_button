@@ -35,14 +35,14 @@ class Tx_GrbFacebookLikeButton_Controller_LikeButtonController extends Tx_Extbas
 	
 	/**
 	 * 
-	 * Enter description here ...
+	 * Facebook OG-Data
 	 * @var Array;
 	 */
 	protected $og;
 	
 	/**
 	 * 
-	 * Enter description here ...
+	 * Facebook Button-Data
 	 * @var Array;
 	 */
 	protected $buttonValue;	
@@ -54,12 +54,29 @@ class Tx_GrbFacebookLikeButton_Controller_LikeButtonController extends Tx_Extbas
 	protected $storagePid = NULL;		
 	
 	/**
+	 * 
+	 * Enter description here ...
+	 * @var Tx_GrbFacebookLikeButton_Domain_Repository_ContentRepository
+	 */
+	protected $contentRepository;
+	
+	/**
+	 * 
+	 * Enter description here ...
+	 * @var Tx_GrbFacebookLikeButton_Domain_Repository_NewsRepository
+	 */
+	protected $newsRepository;	
+	
+	
+	/**
 	 * Initializes the current action
 	 * @return void
 	 */
 	protected function initializeAction() {
 		
 		$this->contentRepository 	= t3lib_div::makeInstance('Tx_GrbFacebookLikeButton_Domain_Repository_ContentRepository');
+		$this->newsRepository 		= t3lib_div::makeInstance('Tx_GrbFacebookLikeButton_Domain_Repository_NewsRepository');
+
 		$currentUrl = (!empty($_SERVER['HTTPS'])) ? "https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] : "http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'];
 		
 		$this->og['title'] 					= $GLOBALS['TSFE']->page['title'];
@@ -78,17 +95,7 @@ class Tx_GrbFacebookLikeButton_Controller_LikeButtonController extends Tx_Extbas
 		$this->buttonValue['font'] 			= $this->settings['buttonValue']['font'];
 		$this->buttonValue['colorscheme'] 	= $this->settings['buttonValue']['colorscheme'];
 		
-		
-		// Get pid, if the gallery is on a tt_news-based page-type
-		$tx_ttnews = t3lib_div::_GP('tx_ttnews');
-		if(isset($tx_ttnews['tt_news'])){
-			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('pid', 'tt_news', 'uid='.intval($tx_ttnews['tt_news']),'', '');
-			while($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)){
-				$this->storagePid = $row['pid'];
-			}
-		}
-		
-		// Get pid, if the gallery is on a normal typo3-page-type
+		// Get pid, if the button is on a normal site
 		if($this->storagePid == NULL){
 			$this->storagePid = $GLOBALS["TSFE"]->id;
 		}			
@@ -134,32 +141,25 @@ class Tx_GrbFacebookLikeButton_Controller_LikeButtonController extends Tx_Extbas
 		// -----------------------------------------------------------		
 		
 		$tx_ttnews = t3lib_div::_GP('tx_ttnews');
-		$newsContent = array();
 		if(isset($tx_ttnews['tt_news'])){
-			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery('image,short,bodytext', 'tt_news', 'uid='.intval($tx_ttnews['tt_news']),'', '');
-			
-			while($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)){
-				$newsContent['image'] 		= explode(',', $row['image']);
-				$newsContent['short']  		= strip_tags($row['short']);
-				$newsContent['bodytext']  	= strip_tags($row['bodytext']);
-			}
+			$newsPost = $this->newsRepository->findByUid($tx_ttnews['tt_news']);
+			$newsImages = $newsPost->getImages();
 			
 			// Get Image
-			if(isset($newsContent['image'][0])){
-				$this->og['image'] = 'http://'.$_SERVER["SERVER_NAME"].'/uploads/pics/'.$newsContent['image'][0];
+			if(isset($newsImages[0])){
+				$this->og['image'] = 'http://'.$_SERVER["SERVER_NAME"].'/uploads/pics/'.$newsImages[0];
 			}	
 			
-			// Get Text	
-			if(isset($newsContent['short'])){
-				$this->og['description'] = $newsContent['short'];	
+			// Get Text
+			$newsShort = $newsPost->getShort();	
+			if(isset($newsShort)){
+				$this->og['description'] = $newsPost->getShort();	
 			}else{
-				$this->og['description'] = $newsContent['bodytext'];
+				$this->og['description'] = $newsPost->getBodytext();
 			}
 		}	
 		
-			
-		
-		$GLOBALS['TSFE']->additionalHeaderData[$extKey] = '
+		$GLOBALS['TSFE']->additionalHeaderData[$this->extensionName ] = '
 			<meta property="og:title" content="'.$this->og['title'].'"/>
     		<meta property="og:type" content="'.$this->og['type'].'"/>
     		<meta property="og:url" content="'.$this->og['url'].'"/>
@@ -169,6 +169,9 @@ class Tx_GrbFacebookLikeButton_Controller_LikeButtonController extends Tx_Extbas
     		<meta property="og:description" content="'.$this->og['description'].'"/>
 		';		
 		
+		if($_GET['debug']==1){
+			t3lib_div::debug($this->extensionName );
+		}
 		$this->view->assign('buttonValue', $this->buttonValue);
 	}
 	
